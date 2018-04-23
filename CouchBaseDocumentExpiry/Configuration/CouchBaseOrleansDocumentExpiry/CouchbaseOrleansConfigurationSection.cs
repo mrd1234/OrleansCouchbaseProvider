@@ -1,6 +1,6 @@
 ﻿using System.Configuration;
 
-namespace CouchBaseProviders.Configuration.CouchbaseOrleansDocumentExpiry
+namespace CouchBaseDocumentExpiry.Configuration.CouchBaseOrleansDocumentExpiry
 {
     public class CouchbaseOrleansConfigurationSection : ConfigurationSection
     {

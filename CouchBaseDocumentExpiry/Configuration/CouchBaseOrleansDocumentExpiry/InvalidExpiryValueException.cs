@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Runtime.Serialization;
 using System.Text;
 
-namespace CouchBaseProviders.Configuration.CouchbaseOrleansDocumentExpiry
+namespace CouchBaseDocumentExpiry.Configuration.CouchBaseOrleansDocumentExpiry
 {
     internal class InvalidExpiryValueException : Exception
     {

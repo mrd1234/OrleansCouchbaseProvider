@@ -1,5 +1,5 @@
 ﻿using System;
-using CouchBaseProviders.Configuration;
+using CouchBaseDocumentExpiry.Configuration;
 using Xunit;
 
 namespace CouchBaseStorageTests

@@ -1,6 +1,5 @@
 using System.Threading.Tasks;
 using Orleans;
-using Orleans.Providers;
 
 namespace TestGrains
 {
@@ -15,7 +14,8 @@ namespace TestGrains
 
     public class StorageData
     {
-        public int value;
+        public int Value;
+        public bool Initialised;
     }
 
     public class CouchBaseStorageGrain : Grain<StorageData>, ICouchBaseStorageGrain
@@ -29,7 +29,12 @@ namespace TestGrains
 
         public Task<int> GetValue()
         {
-            return Task.FromResult(State.value);
+            return Task.FromResult(State.Value);
+        }
+
+        public async Task<bool> IsInitialised()
+        {
+            return await Task.FromResult(State.Initialised);
         }
 
         public Task Read()
@@ -39,20 +44,22 @@ namespace TestGrains
 
         public Task Write(int value)
         {
-            State.value = value;
-            return WriteStateAsync();
+            State.Value = value;
+            State.Initialised = true;
+            var result = WriteStateAsync();
+            return result;
         }
 
         public Task SetValue(int val)
         {
-            State.value = val;
+            State.Value = val;
             return TaskDone.Done;
         }
 
         public async Task Delete()
         {
             await ClearStateAsync();
-            State.value = 0;
+            State.Value = 0;
         }
     }
 }

@@ -1,22 +1,19 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
 using Orleans.Storage;
 using Couchbase;
+using CouchBaseDocumentExpiry.DocumentExpiry;
+using CouchBaseProviders;
 
 namespace CouchBaseStorageTests
 {
-    
-
     public class CouchBaseDataManagerTests : IClassFixture<CouchBaseDataManagerTests.CouchBaseFixture>
     {
         public class CouchBaseFixture : IDisposable
         {
             public CouchBaseDataManager manager;
-
+            
             public CouchBaseFixture()
             {
                 var clientConfig = new Couchbase.Configuration.Client.ClientConfiguration();
@@ -34,21 +31,27 @@ namespace CouchBaseStorageTests
 
             public void Dispose()
             {
+                CleanupBucket();
+                manager.Dispose();
+                manager = null;
+            }
+            
+            internal static void CleanupBucket()
+            {
                 var b = ClusterHelper.GetBucket("default");
                 b.Remove("test_1");
                 b.Remove("test_2");
                 b.Remove("test_3");
-                manager.Dispose();
-                manager = null;
+                b.Remove("test_5");
             }
         }
 
-        private CouchBaseDataManager manager;
+        private readonly CouchBaseDataManager manager;
 
         public CouchBaseDataManagerTests(CouchBaseFixture fixture)
         {
             manager = fixture.manager;
-            
+            CouchBaseFixture.CleanupBucket();
         }
 
         [Fact]
@@ -93,7 +96,5 @@ namespace CouchBaseStorageTests
             Assert.Equal(r.Item1, null);
 
         }
-
-
     }
 }
