@@ -1,17 +1,12 @@
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Threading.Tasks;
 using Orleans.Providers;
 using Couchbase;
 using Couchbase.Configuration.Client;
 using Couchbase.Core;
-using CouchBaseDocumentExpiry.Configuration;
 using CouchBaseDocumentExpiry.DocumentExpiry;
 using CouchBaseProviders.Configuration;
-using CouchBaseProviders;
+using Orleans.Runtime;
 
 namespace Orleans.Storage
 {
@@ -49,10 +44,10 @@ namespace Orleans.Storage
             this.Name = name;
 
             ProviderRuntime = providerRuntime;
-
+            
             var clientConfiguration = config.Properties.ReadCouchbaseConfiguration(out var storageBucketName);
 
-            DataManager = new CouchBaseDataManager(storageBucketName, clientConfiguration);
+            DataManager = new CouchBaseDataManager(storageBucketName, clientConfiguration, providerRuntime);
             return base.Init(name, providerRuntime, config);
         }
     }
@@ -67,20 +62,47 @@ namespace Orleans.Storage
         /// <summary>
         /// Name of the bucket that it works with.
         /// </summary>
-        protected readonly string bucketName;
+        protected string bucketName;
 
         /// <summary>
         /// The cached bucket reference
         /// </summary>
         protected IBucket bucket;
 
+        private ExpiryManager ExpiryManager { get; }
+        public Logger Logger { get; }
+
         /// <summary>
         /// Constructor
         /// </summary>
         /// <param name="bucketName">Name of the bucket that this manager should operate on.</param>
         /// <param name="clientConfig">Configuration object for the database client</param>
-        /// ///
         public CouchBaseDataManager(string bucketName, ClientConfiguration clientConfig)
+        {
+            Initialise(bucketName, clientConfig);
+        }
+
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="bucketName">Name of the bucket that this manager should operate on.</param>
+        /// <param name="clientConfig">Configuration object for the database client</param>
+        /// <param name="providerRuntime">Runtime reference used to gain access to GrainFactory etc</param>
+        public CouchBaseDataManager(string bucketName, ClientConfiguration clientConfig, IProviderRuntime providerRuntime)
+        {
+            Initialise(bucketName, clientConfig);
+            ExpiryManager = new ExpiryManager(providerRuntime);
+
+            Logger = providerRuntime.GetLogger(this.GetType().FullName);
+            Logger.Info("{0} - constructor called", this.GetType().FullName);
+        }
+
+        /// <summary>
+        /// Validates and applies storage provider configuration
+        /// </summary>
+        /// <param name="bucketName">Name of the bucket that this manager should operate on.</param>
+        /// <param name="clientConfig">Configuration object for the database client</param>
+        private void Initialise(string bucketName, ClientConfiguration clientConfig)
         {
             //Bucket name should not be empty
             //Keep in mind that you should create the buckets before being able to use them either
@@ -106,6 +128,7 @@ namespace Orleans.Storage
                     {
                         ClusterHelper.Get().Configuration.BucketConfigs.Remove(conf.Key);
                     }
+
                     ClusterHelper.Get().Configuration.BucketConfigs.Add(conf.Key, conf.Value);
                 }
             }
@@ -157,11 +180,11 @@ namespace Orleans.Storage
         /// <param name="entityData">The grain state data to be stored.</param>
         /// <param name="eTag"></param>
         /// <returns>Completion promise for this operation.</returns>
-        public async Task<string> Write(string collectionName, string key, string entityData, string eTag)
+        public async Task<string> Write(string collectionName, string key, string entityData, string eTag, string primaryKey)
         {
             var documentId = GetDocumentId(collectionName, key);
 
-            var expiry = await ExpiryManager.Instance.GetExpiryAsync(collectionName, key, entityData);
+            var expiry = await ExpiryManager.GetExpiryAsync(collectionName, entityData, primaryKey);
 
             var result = string.Empty;
 
@@ -194,7 +217,7 @@ namespace Orleans.Storage
             if (expiry.Expiry.Expiry == TimeSpan.Zero) return result;
 
             //Notify the grain that there is an expiry value for it so it can ensure it deactivates within the expiry time
-            ExpiryManager.Instance.NotifyGrainOfExpiry(expiry);
+            ExpiryManagerEventNotifier.Instance.NotifyGrainOfExpiry(expiry);
             
             return result;
         }

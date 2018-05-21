@@ -87,9 +87,6 @@
     <Reference Include="System.Data" />
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
-    <Reference Include="Unibet.AU.Infrastructure.Interfaces">
-      <HintPath>..\..\bet-processing-services\packages\Unibet.AU.Infrastructure.Interfaces.4.0.23\lib\net461\Unibet.AU.Infrastructure.Interfaces.dll</HintPath>
-    </Reference>
     <Reference Include="WeakEvent, Version=2.1.1.0, Culture=neutral, processorArchitecture=MSIL">
       <HintPath>..\packages\ThomasLevesque.WeakEvent.2.1.1\lib\net45\WeakEvent.dll</HintPath>
     </Reference>
@@ -106,10 +103,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
-    <None Include="ClientConfiguration.config">
-      <SubType>Designer</SubType>
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
     <None Include="CouchBaseProviders.nuspec" />
     <None Include="packages.config" />
   </ItemGroup>

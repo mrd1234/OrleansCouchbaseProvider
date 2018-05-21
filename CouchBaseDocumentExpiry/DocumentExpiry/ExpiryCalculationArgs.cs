@@ -7,16 +7,19 @@
         public class ExpiryCalculationArgs : EventArgs
         {
             public string GrainType { get; }
-            public string GrainKey { get; }
+
+            public string GrainPrimaryKeyAsString { get; }
+
             public string Data { get; }
+
             public ExpirySourceAndValue Expiry { get; }
 
-            public ExpiryCalculationArgs(string grainType, string grainKey, string data, ExpirySourceAndValue expiry)
+            public ExpiryCalculationArgs(string grainType, string data, ExpirySourceAndValue expiry, string grainPrimaryKeyAsString)
             {
                 GrainType = grainType;
-                GrainKey = grainKey;
                 Data = data;
                 Expiry = expiry;
+                GrainPrimaryKeyAsString = grainPrimaryKeyAsString;
             }
 
             public class ExpirySourceAndValue

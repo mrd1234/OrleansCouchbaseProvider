@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using CouchBaseDocumentExpiry.Configuration.CouchBaseOrleansDocumentExpiry;
+using CouchBaseDocumentExpiry.Exceptions;
 
 namespace CouchBaseDocumentExpiry.Configuration
 {

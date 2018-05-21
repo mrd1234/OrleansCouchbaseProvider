@@ -1,124 +1,64 @@
 ﻿namespace CouchBaseDocumentExpiry.DocumentExpiry
 {
     using System;
-    using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
-    using System.Reflection;
     using System.Threading.Tasks;
-    using WeakEvent;
-    using CouchBaseDocumentExpiry.Configuration;
+    using System.ComponentModel;
+    using System.Collections.Generic;
+    using Orleans;
+    using Orleans.Providers;
+    using Configuration;
+    
+    using Orleans.Runtime;
 
     public partial class ExpiryManager
     {
-        private static readonly object Locker = new object();
-        private static ExpiryManager _instance;
-
         /// <summary>
         /// Document expiries by grain type
         /// </summary>
-        private static Dictionary<string, TimeSpan> DocumentExpiries { get; set; }
+        private Dictionary<string, TimeSpan> DocumentExpiries { get; }
 
         /// <summary>
-        /// Calculator classes used to determine document expiry base don model (grain state) data
+        /// Calculator classes used to determine document expiry based on model (grain state) data
         /// </summary>
-        private static Dictionary<string, IExpiryCalculator> ExpiryCalculators { get; set; }
+        private Dictionary<string, IExpiryCalculator> ExpiryCalculators { get; set; }
 
-        private readonly WeakEventSource<ExpiryCalculationArgs> expiryCalculationEventSource = new WeakEventSource<ExpiryCalculationArgs>();
-        public event EventHandler<ExpiryCalculationArgs> ExpiryCalculated
+        private IProviderRuntime ProviderRuntime { get; }
+
+        private Logger Logger { get; }
+
+        public ExpiryManager(IProviderRuntime providerRuntime)
         {
-            add => expiryCalculationEventSource.Subscribe(value);
-            remove => expiryCalculationEventSource.Unsubscribe(value);
+            ProviderRuntime = providerRuntime;
+            Logger = providerRuntime.GetLogger(this.GetType().FullName);
+
+            DocumentExpiries = CouchbaseOrleansConfigurationExtensions.GetGrainExpiries();
+            GetCalculators(ProviderRuntime.GrainFactory);
         }
 
-        public static ExpiryManager Instance
+        private void GetCalculators(IGrainFactory grainFactory)
         {
-            get
+            var expiryCalculatorLoader = new ExpiryCalculatorLoader(grainFactory, Logger);
+            ExpiryCalculators = expiryCalculatorLoader.LoadExpiryCalculators();
+            
+            ExpiryCalculators.Keys.ToList().ForEach(f =>
             {
-                lock (Locker)
-                {
-                    if (_instance != null) return _instance;
-
-                    _instance = new ExpiryManager();
-
-                    DocumentExpiries = CouchbaseOrleansConfigurationExtensions.GetGrainExpiries();
-                    ExpiryCalculators = Instance.LoadExpiryCalculators();
-
-                    return _instance;
-                }
-            }
-        }
-
-        private Dictionary<string, IExpiryCalculator> LoadExpiryCalculators()
-        {
-            return LoadExpiryCalculators(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location));
-        }
-
-        private Dictionary<string, IExpiryCalculator> LoadExpiryCalculators(string folder)
-        {
-            if (string.IsNullOrWhiteSpace(folder)) throw new ArgumentException($"{nameof(folder)} cannot be empty", nameof(folder));
-
-            var expiryCalculators = new Dictionary<string, IExpiryCalculator>();
-
-            var files = Directory.GetFiles(folder, "*.dll").ToList();
-
-            files.ForEach(file =>
-            {
-                //Get all expiry calculators
-                var calculators = GetCalculatorsFromAssembly(file);
-
-                calculators.ForEach(f =>
-                {
-                    var calculator = (IExpiryCalculator)Activator.CreateInstance(f);
-                    expiryCalculators.Add(calculator.GrainType, calculator);
-                });
+                Logger.Info($"CouchbaseStorageProvider has loaded {ExpiryCalculators[f].GetType().FullName} to calculate expiry values for {f} grain type");
             });
-
-            return expiryCalculators;
         }
 
-        private Dictionary<string, IExpiryCalculator> LoadExpiryCalculators(string folder, string filename)
+        public async Task<ExpiryCalculationArgs> GetExpiryAsync(string grainType, string entityData, string primaryKey)
         {
-            if (string.IsNullOrWhiteSpace(folder)) throw new ArgumentException($"{nameof(folder)} cannot be empty", nameof(folder));
-            if (string.IsNullOrWhiteSpace(filename)) throw new ArgumentException($"{nameof(filename)} cannot be empty", nameof(filename));
-            if (!File.Exists(Path.Combine(folder, filename))) throw new FileNotFoundException($"{filename} could not be found in {folder}");
+            var args = BuildExpiryCalculationArgs(grainType, entityData, primaryKey);
 
-            var expiryCalculators = new Dictionary<string, IExpiryCalculator>();
+            if (ExpiryCalculators.ContainsKey(grainType)) await ExpiryCalculators[grainType].CalculateAsync(args);
 
-            //Get all expiry calculators
-            var calculators = GetCalculatorsFromAssembly(filename);
-
-            calculators.ForEach(f =>
-            {
-                var calculator = (IExpiryCalculator)Activator.CreateInstance(f);
-                expiryCalculators.Add(calculator.GrainType, calculator);
-            });
-
-            return expiryCalculators;
-        }
-
-        private static List<Type> GetCalculatorsFromAssembly(string file)
-        {
-            try
-            {
-                return Assembly.LoadFile(file).GetExportedTypes().Where(w => typeof(IExpiryCalculator).IsAssignableFrom(w) && !w.IsInterface).ToList();
-            }
-            catch (Exception)
-            {
-                return new List<Type>();
-            }
-        }
-
-        public async Task<ExpiryCalculationArgs> GetExpiryAsync(string grainType, string grainKey, string entityData)
-        {
-            var args = BuildExpiryCalculationArgs(grainType, grainKey, entityData);
-
-            if (ExpiryCalculators.ContainsKey(grainType)) ExpiryCalculators[grainType].Calculate(args);
+            LogExpiryDetails(args, grainType, primaryKey);
 
             return args;
         }
 
-        private static ExpiryCalculationArgs BuildExpiryCalculationArgs(string grainType, string grainKey, string entityData)
+        private ExpiryCalculationArgs BuildExpiryCalculationArgs(string grainType, string entityData, string primaryKey)
         {
             var expiry = TimeSpan.Zero;
             var expirySource = ExpiryCalculationArgs.ExpirySources.NoExpiry;
@@ -129,16 +69,30 @@
                 expirySource = ExpiryCalculationArgs.ExpirySources.ConfigFile;
             }
 
-            var args = new ExpiryCalculationArgs(grainType, grainKey, entityData, new ExpiryCalculationArgs.ExpirySourceAndValue { Source = expirySource, Expiry = expiry });
+            var args = new ExpiryCalculationArgs(grainType, entityData, new ExpiryCalculationArgs.ExpirySourceAndValue { Source = expirySource, Expiry = expiry }, primaryKey);
             return args;
         }
 
-        public void NotifyGrainOfExpiry(ExpiryCalculationArgs eventArgs)
+        private void LogExpiryDetails(ExpiryCalculationArgs args, string grainType, string primaryKey)
         {
-            lock (Locker)
+            string message;
+
+            switch (args.Expiry.Source)
             {
-                expiryCalculationEventSource.Raise(this, eventArgs);
+                case ExpiryCalculationArgs.ExpirySources.NoExpiry:
+                    message = $"{grainType} grain with key {primaryKey} has no expiry value set";
+                    break;
+                case ExpiryCalculationArgs.ExpirySources.ConfigFile:
+                    message = $"{grainType} grain with key {primaryKey} has an expiry value of {args.Expiry.Expiry.ToLongString()} provided by config file.";
+                    break;
+                case ExpiryCalculationArgs.ExpirySources.Dynamic:
+                    message = $"{grainType} grain with key {primaryKey} has an expiry value of {args.Expiry.Expiry.ToLongString()} provided by dynamic expiry calculator";
+                    break;
+                default:
+                    throw new InvalidEnumArgumentException($"{args.Expiry.Source} is not a valid value for expiry source");
             }
+
+            Logger.Info(message);
         }
     }
 }

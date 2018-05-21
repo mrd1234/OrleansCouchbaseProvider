@@ -1,4 +1,4 @@
-﻿namespace CouchBaseDocumentExpiry.DocumentExpiry
+﻿namespace CouchBaseDocumentExpiry.Exceptions
 {
     using System;
     using System.Runtime.Serialization;

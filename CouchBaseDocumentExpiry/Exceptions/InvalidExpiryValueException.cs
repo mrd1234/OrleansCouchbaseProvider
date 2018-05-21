@@ -1,10 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Runtime.Serialization;
-using System.Text;
-
-namespace CouchBaseDocumentExpiry.Configuration.CouchBaseOrleansDocumentExpiry
+﻿namespace CouchBaseDocumentExpiry.Exceptions
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Runtime.Serialization;
+    using System.Text;
+
     internal class InvalidExpiryValueException : Exception
     {
         public InvalidExpiryValueException()

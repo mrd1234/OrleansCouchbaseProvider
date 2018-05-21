@@ -1,55 +1,18 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Xunit;
 using Orleans.TestingHost;
-using Orleans;
 using Polly;
 using TestGrains;
 
 namespace CouchBaseStorageTests
 {
-    public class CouchBaseGrainStorageTests : IClassFixture<CouchBaseGrainStorageTests.CouchBaseGrainStorageFixture>
+    public class CouchBaseGrainStorageTests : IClassFixture<CouchBaseGrainStorageFixture>
     {
-        public class CouchBaseGrainStorageFixture : IDisposable
-        {
-            public TestCluster HostedCluster;
-
-            private void AdjustConfig(Orleans.Runtime.Configuration.ClusterConfiguration c)
-            {
-                c.Globals.RegisterStorageProvider<Orleans.Storage.OrleansCouchBaseStorage>("Default",
-                    new Dictionary<string, string>
-                            {
-                                { "Servers","http://localhost:8091" },
-                                { "UserName","" },
-                                { "Password","" },
-                                { "BucketName","default" }
-                            });
-            }
-
-            public CouchBaseGrainStorageFixture()
-            {
-                GrainClient.Uninitialize();
-                TestClusterOptions o = new TestClusterOptions(2);
-                AdjustConfig(o.ClusterConfiguration);
-                
-                HostedCluster = new TestCluster(o);
-                
-                if (HostedCluster.Primary == null)
-                    HostedCluster.Deploy();
-
-            }
-
-            public void Dispose()
-            {
-                HostedCluster.StopAllSilos();
-            }
-        }
-
         private TestCluster host;
 
-        public CouchBaseGrainStorageTests(CouchBaseGrainStorageTests.CouchBaseGrainStorageFixture fixture)
+        public CouchBaseGrainStorageTests(CouchBaseGrainStorageFixture fixture)
         {
             host = fixture.HostedCluster;
         }
@@ -85,7 +48,7 @@ namespace CouchBaseStorageTests
                 var isInitialised = grain.IsInitialised().Result;
                 var value = grain.GetValue().Result;
 
-                Assert.False(isInitialised);
+                Assert.False(isInitialised, "State is still initialised");
                 Assert.Equal(value, 0);
 
                 var timeTaken = DateTime.Now.Subtract(startTime);
@@ -93,7 +56,7 @@ namespace CouchBaseStorageTests
                 //Note that Orleans decides exactly when to deactivate a grain so the time will never exactly match the configured expiry value
 
                 //Check deactivation happened after the 10 second timeout in the config file
-                Assert.True(timeTaken >= TimeSpan.FromSeconds(10));
+                Assert.True(timeTaken >= TimeSpan.FromSeconds(10), $"Expected expiry of around 10 seconds but it took {timeTaken.TotalSeconds} seconds");
             });
         }
 
@@ -115,7 +78,7 @@ namespace CouchBaseStorageTests
                 var isInitialised = grain.IsInitialised().Result;
                 var value = grain.GetValue().Result;
 
-                Assert.False(isInitialised);
+                Assert.False(isInitialised, "State is still initialised");
                 Assert.Equal(value, 0);
 
                 var timeTaken = DateTime.Now.Subtract(startTime);
@@ -126,7 +89,7 @@ namespace CouchBaseStorageTests
                 Assert.True(timeTaken > TimeSpan.FromSeconds(10));
 
                 //Check the deactivation didn't occur before the 30 seconds set by expiry calculator
-                Assert.True(timeTaken >= TimeSpan.FromSeconds(30));
+                Assert.True(timeTaken >= TimeSpan.FromSeconds(30), $"Expected expiry of around 30 seconds but it took {timeTaken.TotalSeconds} seconds");
             });
         }
 

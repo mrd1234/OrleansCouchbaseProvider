@@ -1,8 +1,11 @@
 ﻿namespace CouchBaseDocumentExpiry.DocumentExpiry
 {
+    using System.Threading.Tasks;
+
     public interface IExpiryCalculator
     {
         string GrainType { get; }
-        void Calculate(ExpiryManager.ExpiryCalculationArgs e);
+
+        Task CalculateAsync(ExpiryManager.ExpiryCalculationArgs e);
     }
 }

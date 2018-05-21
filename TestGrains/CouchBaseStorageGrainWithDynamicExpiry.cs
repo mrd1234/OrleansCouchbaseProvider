@@ -1,5 +1,3 @@
-using System;
-
 namespace TestGrains
 {
     using System.Threading.Tasks;
@@ -58,16 +56,6 @@ namespace TestGrains
         {
             await ClearStateAsync();
             State.Value = 0;
-        }
-    }
-
-    public class CouchBaseStorageGrainExpiryCalculator : IExpiryCalculator
-    {
-        public string GrainType { get; } = "CouchBaseStorageGrainWithDynamicExpiry";
-
-        public void Calculate(ExpiryManager.ExpiryCalculationArgs e)
-        {
-            e.SetExpiry(TimeSpan.FromSeconds(30));
         }
     }
 }
