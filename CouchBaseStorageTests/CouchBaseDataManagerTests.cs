@@ -1,15 +1,15 @@
-﻿using System;
-using System.Threading.Tasks;
-using Xunit;
-using Orleans.Storage;
-using Couchbase;
-using Orleans;
-using Orleans.Providers;
-using Orleans.Runtime;
-using Orleans.TestingHost.Utils;
-
-namespace CouchBaseStorageTests
+﻿namespace CouchBaseStorageTests
 {
+    using System;
+    using System.Threading.Tasks;
+    using Xunit;
+    using Orleans.Storage;
+    using Couchbase;
+    using Orleans;
+    using Orleans.Providers;
+    using Orleans.Runtime;
+    using Orleans.TestingHost.Utils;
+
     public class ProviderRuntimeFixture : IClassFixture<IProviderRuntime>, IProviderRuntime
     {
         public Logger GetLogger(string loggerName)

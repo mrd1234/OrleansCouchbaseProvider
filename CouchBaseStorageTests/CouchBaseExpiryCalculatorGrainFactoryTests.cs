@@ -13,17 +13,17 @@
     /// </summary>
     public class CouchBaseExpiryCalculatorGrainFactoryTests : IClassFixture<CouchBaseGrainStorageFixture>
     {
-        private TestCluster host;
+        private readonly TestCluster _host;
 
         public CouchBaseExpiryCalculatorGrainFactoryTests(CouchBaseGrainStorageFixture fixture)
         {
-            host = fixture.HostedCluster;
+            _host = fixture.HostedCluster;
         }
-
+        
         [Fact]
         public async Task ExpiryCalculatorUsingGrainClientGrainFactoryTest_ShouldThrow()
         {
-            var grain = host.GrainFactory.GetGrain<ICouchBaseStorageGrainGrainFactoryTest1>(Guid.NewGuid());
+            var grain = _host.GrainFactory.GetGrain<ICouchBaseStorageGrainFactoryTest1>(Guid.NewGuid());
 
             var exceptionCalled = false;
 
@@ -46,7 +46,7 @@
         [Fact]
         public async Task ExpiryCalculatorUsingProviderRuntimeGrainFactoryTest_ShouldNotThrow()
         {
-            var grain = host.GrainFactory.GetGrain<ICouchBaseStorageGrainGrainFactoryTest2>(Guid.NewGuid());
+            var grain = _host.GrainFactory.GetGrain<ICouchBaseStorageGrainFactoryTest2>(Guid.NewGuid());
 
             //This should NOT throw because the grain expiry calculator is trying to use providerruntime.grainfactory - which is passed into constructor by storage provider
             await grain.Write(123);

@@ -44,6 +44,7 @@
     <Compile Include="Configuration\CouchBaseOrleansDocumentExpiry\CouchbaseOrleansGrainExpiryConstants.cs" />
     <Compile Include="Configuration\CouchBaseOrleansDocumentExpiry\GrainExpiry.cs" />
     <Compile Include="Configuration\CouchBaseOrleansDocumentExpiry\GrainExpiryCollection.cs" />
+    <Compile Include="DocumentExpiry\GenericExpiryCalculatorBase.cs" />
     <Compile Include="Exceptions\MultipleExpiryCalculatorsForGrainTypeException.cs" />
     <Compile Include="Exceptions\InvalidExpiryValueException.cs" />
     <Compile Include="DocumentExpiry\ExpiryCalculationArgs.cs" />

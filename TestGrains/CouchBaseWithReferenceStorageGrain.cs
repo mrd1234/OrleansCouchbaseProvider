@@ -1,9 +1,8 @@
-using System.Threading.Tasks;
-using Orleans;
-
 namespace TestGrains
 {
     using System;
+    using System.Threading.Tasks;
+    using Orleans;
 
     /// <summary>
     /// A grain that references another grain, also persisting other grain's reference into this grain's state.

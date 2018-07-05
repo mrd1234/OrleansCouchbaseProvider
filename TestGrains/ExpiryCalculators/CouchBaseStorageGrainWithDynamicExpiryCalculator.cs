@@ -6,15 +6,15 @@
     using Orleans;
 
     [Serializable]
-    public class CouchBaseStorageGrainWithDynamicExpiryCalculator : ExpiryCalculatorBase
+    public class CouchBaseStorageGrainWithDynamicExpiryCalculator : GenericExpiryCalculatorBase<CouchBaseStorageGrainWithDynamicExpiry, StorageData>
     {
-        public override string GrainType { get; } = typeof(CouchBaseStorageGrainWithDynamicExpiry).Name;
+        protected override TimeSpan ExpiryOnError { get; } = TimeSpan.FromDays(365);
 
         public CouchBaseStorageGrainWithDynamicExpiryCalculator(IGrainFactory grainFactory) : base(grainFactory)
         {
         }
-
-        public override Task CalculateAsync(ExpiryManager.ExpiryCalculationArgs e)
+        
+        protected override Task PerformCalculationAsync(ExpiryManager.ExpiryCalculationArgs e, StorageData model)
         {
             e.SetExpiry(TimeSpan.FromSeconds(30));
             return TaskDone.Done;

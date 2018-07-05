@@ -58,6 +58,7 @@
             assembliesInheritingFromBaseClass.ForEach(f =>
             {
                 var calculator = (ExpiryCalculatorBase) Activator.CreateInstance(f, GrainFactory);
+                
                 HandleDuplicates(calculator);
                 expiryCalculators.Add(calculator.GrainType, calculator);
             });
@@ -91,7 +92,7 @@
         {
             try
             {
-                assembliesInheritingFromBaseClass = Assembly.LoadFile(file).GetExportedTypes().Where(w => w.IsSubclassOf(typeof(ExpiryCalculatorBase))).ToList();
+                assembliesInheritingFromBaseClass = Assembly.LoadFile(file).GetExportedTypes().Where(w => !w.IsAbstract && !w.IsGenericType && w.IsSubclassOf(typeof(ExpiryCalculatorBase))).ToList();
             }
             catch (Exception)
             {

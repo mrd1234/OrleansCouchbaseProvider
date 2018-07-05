@@ -1,17 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
-using Orleans;
-using Orleans.Storage;
-using Orleans.Runtime;
-using Couchbase;
-using System.Net;
-
-namespace CouchBaseStorageTests
+﻿namespace CouchBaseStorageTests
 {
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading;
+    using System.Threading.Tasks;
+    using Xunit;
+    using Orleans;
+    using Orleans.Storage;
+    using Orleans.Runtime;
+    using System.Net;
+
     public static class TaskExtensions
     {
         /// <summary>

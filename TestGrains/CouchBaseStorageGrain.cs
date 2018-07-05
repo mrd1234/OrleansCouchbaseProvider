@@ -1,8 +1,8 @@
-using System.Threading.Tasks;
-using Orleans;
-
 namespace TestGrains
 {
+    using System.Threading.Tasks;
+    using Orleans;
+
     public interface ICouchBaseStorageGrain : IGrainWithGuidKey
     {
         Task Read();

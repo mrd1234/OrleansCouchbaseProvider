@@ -1,13 +1,13 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using Xunit;
-using Orleans.TestingHost;
-using Polly;
-using TestGrains;
-
-namespace CouchBaseStorageTests
+﻿namespace CouchBaseStorageTests
 {
+    using System;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Xunit;
+    using Orleans.TestingHost;
+    using Polly;
+    using TestGrains;
+
     public class CouchBaseGrainStorageTests : IClassFixture<CouchBaseGrainStorageFixture>
     {
         private TestCluster host;

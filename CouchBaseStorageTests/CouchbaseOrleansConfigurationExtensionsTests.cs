@@ -1,9 +1,9 @@
-﻿using System;
-using CouchBaseDocumentExpiry.Configuration;
-using Xunit;
-
-namespace CouchBaseStorageTests
+﻿namespace CouchBaseStorageTests
 {
+    using System;
+    using CouchBaseDocumentExpiry.Configuration;
+    using Xunit;
+
     public class CouchbaseOrleansConfigurationExtensionsTests
     {
         [Fact]

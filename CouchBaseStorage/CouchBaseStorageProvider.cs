@@ -1,15 +1,15 @@
-using System;
-using System.Threading.Tasks;
-using Orleans.Providers;
-using Couchbase;
-using Couchbase.Configuration.Client;
-using Couchbase.Core;
-using CouchBaseDocumentExpiry.DocumentExpiry;
-using CouchBaseProviders.Configuration;
-using Orleans.Runtime;
-
 namespace Orleans.Storage
 {
+    using System;
+    using System.Threading.Tasks;
+    using Orleans.Providers;
+    using Couchbase;
+    using Couchbase.Configuration.Client;
+    using Couchbase.Core;
+    using CouchBaseDocumentExpiry.DocumentExpiry;
+    using CouchBaseProviders.Configuration;
+    using Orleans.Runtime;
+
     /// <summary>
     /// Orleans storage provider implementation for CouchBase http://www.couchbase.com 
     /// </summary>
