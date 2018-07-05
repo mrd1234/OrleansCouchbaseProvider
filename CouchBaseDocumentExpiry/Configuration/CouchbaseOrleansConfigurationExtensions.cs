@@ -2,10 +2,10 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
-using System.Text;
-using CouchBaseProviders.Configuration.CouchbaseOrleansDocumentExpiry;
+using CouchBaseDocumentExpiry.Configuration.CouchBaseOrleansDocumentExpiry;
+using CouchBaseDocumentExpiry.Exceptions;
 
-namespace CouchBaseProviders.Configuration
+namespace CouchBaseDocumentExpiry.Configuration
 {
     /// <summary>
     /// Orleans configuration utility extension methods.

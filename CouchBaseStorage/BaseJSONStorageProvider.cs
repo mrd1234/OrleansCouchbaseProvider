@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-
+using CouchBaseDocumentExpiry.DocumentExpiry;
 using Newtonsoft.Json;
 
 using Orleans.Runtime;
@@ -105,13 +105,13 @@ namespace Orleans.Storage
         public async Task WriteStateAsync(string grainType, GrainReference grainReference, IGrainState grainState)
         {
             if (DataManager == null) throw new ArgumentException("DataManager property not initialized");
-
+            
             var grainTypeName = grainType.Split('.').Last();
             //Serialize the data
             var entityData = ConvertToStorageFormat(grainState);
             //Get the ETag to send to the DB
             var eTag = grainState.ETag;
-            var returnedEtag = await DataManager.Write(grainTypeName, grainReference.ToKeyString(), entityData, eTag);
+            var returnedEtag = await DataManager.Write(grainTypeName, grainReference.ToKeyString(), entityData, eTag, GrainKeyHelper.GetPrimaryKeyAsString(grainReference));
             //Set the new ETag on the state object.
             grainState.ETag = returnedEtag;
         }

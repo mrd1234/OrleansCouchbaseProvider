@@ -34,6 +34,7 @@ namespace Orleans.Storage
         /// <param name="collectionName">The name of a collection, such as a type name.</param>
         /// <param name="key">The primary key of the object to write.</param>
         /// <param name="entityData">A string containing a JSON representation of the entity.</param>
-        System.Threading.Tasks.Task<string> Write(string collectionName, string key, string entityData,string ETag);
+        /// <param name="primaryKey"></param>
+        System.Threading.Tasks.Task<string> Write(string collectionName, string key, string entityData, string ETag, string primaryKey);
     }
 }

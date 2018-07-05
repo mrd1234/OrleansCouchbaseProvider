@@ -1,5 +1,5 @@
 ﻿using System;
-using CouchBaseProviders.Configuration;
+using CouchBaseDocumentExpiry.Configuration;
 using Xunit;
 
 namespace CouchBaseStorageTests
@@ -13,10 +13,14 @@ namespace CouchBaseStorageTests
             var documentExpiryConfiguration = CouchbaseOrleansConfigurationExtensions.GetGrainExpiries();
 
             // Assert
-            Assert.Equal(3, documentExpiryConfiguration.Count);
+            Assert.Equal(5, documentExpiryConfiguration.Count);
             Assert.Contains(documentExpiryConfiguration, pair => pair.Key == "grainX" && pair.Value == TimeSpan.FromMinutes(1));
             Assert.Contains(documentExpiryConfiguration, pair => pair.Key == "grainY" && pair.Value == TimeSpan.FromHours(1));
             Assert.Contains(documentExpiryConfiguration, pair => pair.Key == "grainZ" && pair.Value == TimeSpan.FromDays(1));
+
+
+            Assert.Contains(documentExpiryConfiguration, pair => pair.Key == "CouchBaseStorageGrainWithDynamicExpiry" && pair.Value == TimeSpan.FromSeconds(10));
+            Assert.Contains(documentExpiryConfiguration, pair => pair.Key == "CouchBaseStorageGrainWithAppConfigExpiry" && pair.Value == TimeSpan.FromSeconds(10));
         }
 
         [Fact]

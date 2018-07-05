@@ -1,0 +1,28 @@
+namespace TestGrains
+{
+    using System.Threading.Tasks;
+    using Orleans;
+
+    public interface ICouchBaseStorageGrainGrainFactoryTest1 : IGrainWithGuidKey
+    {
+        Task Write(int value);
+    }
+    
+    public class CouchBaseStorageGrainFactoryTest1 : Grain<StorageData>, ICouchBaseStorageGrainGrainFactoryTest1
+    {
+        public override Task OnActivateAsync()
+        {
+            if (State == null)
+                State = new StorageData();
+            return base.OnActivateAsync();
+        }
+
+        public Task Write(int value)
+        {
+            State.Value = value;
+            State.Initialised = true;
+            var result = WriteStateAsync();
+            return result;
+        }
+    }
+}

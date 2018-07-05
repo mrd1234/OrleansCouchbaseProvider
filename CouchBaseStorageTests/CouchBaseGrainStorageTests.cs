@@ -1,61 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Xunit;
-using Couchbase;
-using Orleans.Storage;
 using Orleans.TestingHost;
-using Orleans;
+using Polly;
 using TestGrains;
 
 namespace CouchBaseStorageTests
 {
-    public class CouchBaseGrainStorageTests : IClassFixture<CouchBaseGrainStorageTests.CouchBaseGrainStorageFixture>
+    public class CouchBaseGrainStorageTests : IClassFixture<CouchBaseGrainStorageFixture>
     {
-        public class CouchBaseGrainStorageFixture : IDisposable
-        {
-            public TestCluster hostedCluster;
-
-            private void AdjustConfig(Orleans.Runtime.Configuration.ClusterConfiguration c)
-            {
-                c.Globals.RegisterStorageProvider<Orleans.Storage.OrleansCouchBaseStorage>("Default",
-                    new Dictionary<string, string>()
-                            {
-                                { "Servers","http://localhost:8091" },
-                                { "UserName","" },
-                                { "Password","" },
-                                { "BucketName","default" }
-                            });
-                
-                
-            }
-
-            public CouchBaseGrainStorageFixture()
-            {
-                GrainClient.Uninitialize();
-                TestClusterOptions o = new TestClusterOptions(2);
-                AdjustConfig(o.ClusterConfiguration);
-                
-                hostedCluster = new TestCluster(o);
-
-                if (hostedCluster.Primary == null)
-                    hostedCluster.Deploy();
-
-            }
-
-            public void Dispose()
-            {
-                hostedCluster.StopAllSilos();
-            }
-        }
-
         private TestCluster host;
 
-        public CouchBaseGrainStorageTests(CouchBaseGrainStorageTests.CouchBaseGrainStorageFixture fixture)
+        public CouchBaseGrainStorageTests(CouchBaseGrainStorageFixture fixture)
         {
-            host = fixture.hostedCluster;
+            host = fixture.HostedCluster;
         }
 
         [Fact]
@@ -69,6 +28,69 @@ namespace CouchBaseStorageTests
             Assert.Equal(3, await grain.GetValue());
             await grain.Delete();
             Assert.Equal(0, await grain.GetValue());
+        }
+
+        [Fact]
+        public async Task GrainWithAppConfigExpiryTest()
+        {
+            var grainId = Guid.NewGuid();
+            var grain = this.host.GrainFactory.GetGrain<ICouchBaseStorageGrainWithAppConfigExpiry>(grainId);
+
+            var startTime = DateTime.Now;
+
+            await grain.Write(100);
+            Assert.True(await grain.IsInitialised());
+
+            //Wait for the grain to expire
+            var retryPolicy = Policy.Handle<Exception>().WaitAndRetry(600, x => TimeSpan.FromMilliseconds(100), (e, t) => Console.WriteLine("Grain has not yet expired - retrying..."));
+            retryPolicy.Execute(() =>
+            {
+                var isInitialised = grain.IsInitialised().Result;
+                var value = grain.GetValue().Result;
+
+                Assert.False(isInitialised, "State is still initialised");
+                Assert.Equal(value, 0);
+
+                var timeTaken = DateTime.Now.Subtract(startTime);
+
+                //Note that Orleans decides exactly when to deactivate a grain so the time will never exactly match the configured expiry value
+
+                //Check deactivation happened after the 10 second timeout in the config file
+                Assert.True(timeTaken >= TimeSpan.FromSeconds(10), $"Expected expiry of around 10 seconds but it took {timeTaken.TotalSeconds} seconds");
+            });
+        }
+
+        [Fact]
+        public async Task GrainWithDynamicExpiryGrainTest()
+        {
+            var grainId = Guid.NewGuid();
+            var grain = this.host.GrainFactory.GetGrain<ICouchBaseStorageGrainWithDynamicExpiry>(grainId);
+
+            var startTime = DateTime.Now;
+
+            await grain.Write(100);
+            Assert.True(await grain.IsInitialised());
+
+            //Wait for the grain to expire
+            var retryPolicy = Policy.Handle<Exception>().WaitAndRetry(600, x => TimeSpan.FromMilliseconds(100), (e, t) => Console.WriteLine("Grain has not yet expired - retrying..."));
+            retryPolicy.Execute(() =>
+            {
+                var isInitialised = grain.IsInitialised().Result;
+                var value = grain.GetValue().Result;
+
+                Assert.False(isInitialised, "State is still initialised");
+                Assert.Equal(value, 0);
+
+                var timeTaken = DateTime.Now.Subtract(startTime);
+
+                //Note that Orleans decides exactly when to deactivate a grain so the time will never exactly match the configured expiry value
+
+                //Check deactivation happened after the 10 second timeout in the config file (since expiry calculator will override that value)
+                Assert.True(timeTaken > TimeSpan.FromSeconds(10));
+
+                //Check the deactivation didn't occur before the 30 seconds set by expiry calculator
+                Assert.True(timeTaken >= TimeSpan.FromSeconds(30), $"Expected expiry of around 30 seconds but it took {timeTaken.TotalSeconds} seconds");
+            });
         }
 
         [Fact]
@@ -114,6 +136,4 @@ namespace CouchBaseStorageTests
             Assert.Equal(retrievedReferencedAt, retrievedReferencedAtPostWrite);
         }
     }
-
-
 }
