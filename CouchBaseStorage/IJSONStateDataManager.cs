@@ -1,7 +1,7 @@
-using System;
-
 namespace Orleans.Storage
 {
+    using System;
+
     /// <summary>
     /// Defines the interface for the lower level of JSON storage providers, i.e.
     /// the part that writes JSON strings to the underlying storage. The higher level

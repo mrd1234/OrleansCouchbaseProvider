@@ -1,13 +1,13 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Orleans;
-using Orleans.Runtime;
-
-namespace Orleans.Storage
+﻿namespace Orleans.Storage
 {
+    using Newtonsoft.Json;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Text;
+    using Orleans;
+    using Orleans.Runtime;
+
     /// <summary>
     /// This class is used to deserialized returned values from DB when Cas is returned
     /// with the actual data as well.

@@ -1,15 +1,15 @@
-using System;
-using System.Linq;
-using System.Threading.Tasks;
-using CouchBaseDocumentExpiry.DocumentExpiry;
-using Newtonsoft.Json;
-
-using Orleans.Runtime;
-using Orleans.Providers;
-using Orleans.Serialization;
-
 namespace Orleans.Storage
 {
+    using System;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using CouchBaseDocumentExpiry.DocumentExpiry;
+    using Newtonsoft.Json;
+
+    using Orleans.Runtime;
+    using Orleans.Providers;
+    using Orleans.Serialization;
+
     /// <summary>
     /// Base class for JSON-based grain storage providers.
     /// </summary>

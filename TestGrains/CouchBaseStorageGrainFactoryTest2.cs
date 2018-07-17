@@ -3,12 +3,12 @@ namespace TestGrains
     using System.Threading.Tasks;
     using Orleans;
 
-    public interface ICouchBaseStorageGrainGrainFactoryTest2 : IGrainWithGuidKey
+    public interface ICouchBaseStorageGrainFactoryTest2 : IGrainWithGuidKey
     {
         Task Write(int value);
     }
     
-    public class CouchBaseStorageGrainFactoryTest2 : Grain<StorageData>, ICouchBaseStorageGrainGrainFactoryTest2
+    public class CouchBaseStorageGrainFactoryTest2 : Grain<StorageData>, ICouchBaseStorageGrainFactoryTest2
     {
         public override Task OnActivateAsync()
         {

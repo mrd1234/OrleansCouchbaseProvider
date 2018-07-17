@@ -44,20 +44,21 @@
     <Compile Include="Configuration\CouchBaseOrleansDocumentExpiry\CouchbaseOrleansGrainExpiryConstants.cs" />
     <Compile Include="Configuration\CouchBaseOrleansDocumentExpiry\GrainExpiry.cs" />
     <Compile Include="Configuration\CouchBaseOrleansDocumentExpiry\GrainExpiryCollection.cs" />
+    <Compile Include="DocumentExpiry\ExpiryCalculatorLoader.cs" />
+    <Compile Include="DocumentExpiry\ExpiryManager.cs" />
+    <Compile Include="DocumentExpiry\ExpiryManagerEventNotifier.cs" />
+    <Compile Include="DocumentExpiry\GenericExpiryCalculatorBase.cs" />
+    <Compile Include="DocumentExpiry\GrainKeyHelper.cs" />
+    <Compile Include="DocumentExpiry\IExpiringGrainBase.cs" />
+    <Compile Include="DocumentExpiry\IExpiryCalculator.cs" />
+    <Compile Include="DocumentExpiry\TimespanExtensions.cs" />
     <Compile Include="Exceptions\MultipleExpiryCalculatorsForGrainTypeException.cs" />
     <Compile Include="Exceptions\InvalidExpiryValueException.cs" />
     <Compile Include="DocumentExpiry\ExpiryCalculationArgs.cs" />
     <Compile Include="DocumentExpiry\ExpiringGrainBase.cs" />
     <Compile Include="DocumentExpiry\ExpiryCalculatorBase.cs" />
-    <Compile Include="DocumentExpiry\ExpiryCalculatorLoader.cs" />
     <Compile Include="Exceptions\ExpiryCalculatorNotProvidedException.cs" />
-    <Compile Include="DocumentExpiry\ExpiryManagerEventNotifier.cs" />
-    <Compile Include="DocumentExpiry\GrainKeyHelper.cs" />
-    <Compile Include="DocumentExpiry\IExpiringGrainBase.cs" />
-    <Compile Include="DocumentExpiry\IExpiryCalculator.cs" />
-    <Compile Include="DocumentExpiry\TimespanExtensions.cs" />
     <Compile Include="Exceptions\UnableToDeterminePrimaryKeyException.cs" />
-    <Compile Include="DocumentExpiry\ExpiryManager.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

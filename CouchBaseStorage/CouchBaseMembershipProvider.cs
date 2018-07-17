@@ -1,21 +1,21 @@
-﻿using Orleans;
-using Orleans.Messaging;
-using Orleans.Runtime.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Orleans.Runtime;
-using Couchbase;
-using Couchbase.Core;
-using Couchbase.Linq;
-using Couchbase.Linq.Extensions;
-using Newtonsoft.Json;
-using Couchbase.N1QL;
-using Newtonsoft.Json.Linq;
-
-namespace Orleans.Storage
+﻿namespace Orleans.Storage
 {
+    using Orleans;
+    using Orleans.Messaging;
+    using Orleans.Runtime.Configuration;
+    using System;
+    using System.Collections.Generic;
+    using System.Linq;
+    using System.Threading.Tasks;
+    using Orleans.Runtime;
+    using Couchbase;
+    using Couchbase.Core;
+    using Couchbase.Linq;
+    using Couchbase.Linq.Extensions;
+    using Newtonsoft.Json;
+    using Couchbase.N1QL;
+    using Newtonsoft.Json.Linq;
+
     public class CouchBaseMembershipProvider : IMembershipTable
     {
         private MembershipDataManager manager;
