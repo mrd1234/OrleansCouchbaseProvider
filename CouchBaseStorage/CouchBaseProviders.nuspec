@@ -13,4 +13,7 @@
     <copyright>Copyright 2017</copyright>
     <tags>orleans storage provider couchbase</tags>
   </metadata>
+  <files>
+    <file src="bin\$configuration$\CouchBaseDocumentExpiry.dll" target="lib\net452" />
+  </files>
 </package>

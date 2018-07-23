@@ -14,6 +14,8 @@
 
             public ExpirySourceAndValue Expiry { get; }
 
+            public Exception CalculationException { get; private set; }
+
             public ExpiryCalculationArgs(string grainType, string data, ExpirySourceAndValue expiry, string grainPrimaryKeyAsString)
             {
                 GrainType = grainType;
@@ -40,6 +42,13 @@
                 Expiry.Source = ExpirySources.Dynamic;
             }
 
+            public void SetException(TimeSpan expiry, Exception exception)
+            {
+                CalculationException = exception;
+                Expiry.Expiry = expiry;
+                Expiry.Source = ExpirySources.ErrorValue;
+            }
+
             public void NoExpiry()
             {
                 Expiry.Expiry = TimeSpan.Zero;
@@ -50,7 +59,8 @@
             {
                 NoExpiry,
                 ConfigFile,
-                Dynamic
+                Dynamic,
+                ErrorValue
             }
         }
     }

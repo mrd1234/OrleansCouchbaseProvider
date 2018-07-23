@@ -22,9 +22,9 @@
                 var model = JsonConvert.DeserializeObject<TState>(e.Data);
                 await this.PerformCalculationAsync(e, model);
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                e.SetExpiry(this.ExpiryOnError);
+                e.SetException(this.ExpiryOnError, ex);
             }
         }
 

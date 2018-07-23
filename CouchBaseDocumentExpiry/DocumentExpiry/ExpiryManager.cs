@@ -2,6 +2,7 @@
 {
     using System;
     using System.Linq;
+    using System.Text;
     using System.Threading.Tasks;
     using System.ComponentModel;
     using System.Collections.Generic;
@@ -77,16 +78,25 @@
         {
             string message;
 
+            var grainName = grainType.Trim().EndsWith("Grain", StringComparison.InvariantCultureIgnoreCase) ? grainType : $"{grainType} grain";
+
             switch (args.Expiry.Source)
             {
                 case ExpiryCalculationArgs.ExpirySources.NoExpiry:
-                    message = $"{grainType} grain with key {primaryKey} has no expiry value set";
+                    message = $"{grainName} with key {primaryKey} has no expiry value set";
                     break;
                 case ExpiryCalculationArgs.ExpirySources.ConfigFile:
-                    message = $"{grainType} grain with key {primaryKey} has an expiry value of {args.Expiry.Expiry.ToLongString()} provided by config file.";
+                    message = $"{grainName} with key {primaryKey} has an expiry value of {args.Expiry.Expiry.ToLongString()} provided by config file.";
                     break;
                 case ExpiryCalculationArgs.ExpirySources.Dynamic:
-                    message = $"{grainType} grain with key {primaryKey} has an expiry value of {args.Expiry.Expiry.ToLongString()} provided by dynamic expiry calculator";
+                    message = $"{grainName} with key {primaryKey} has an expiry value of {args.Expiry.Expiry.ToLongString()} provided by dynamic expiry calculator";
+                    break;
+                case ExpiryCalculationArgs.ExpirySources.ErrorValue:
+                    var detailedMessage = new StringBuilder();
+                    detailedMessage.AppendLine($"{grainName} with key {primaryKey} has an expiry value of {args.Expiry.Expiry.ToLongString()} which is error fallback value.");
+                    detailedMessage.AppendLine($"Grain state: {args.Data}");
+                    detailedMessage.AppendLine($"Exception: {args.CalculationException}");
+                    message = detailedMessage.ToString();
                     break;
                 default:
                     throw new InvalidEnumArgumentException($"{args.Expiry.Source} is not a valid value for expiry source");
